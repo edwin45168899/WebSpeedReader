@@ -1,14 +1,31 @@
 {
   "manifest_version": 3,
   "name": "網頁快速閱讀助手",
-  "version": "1.0.0.16",
+  "version": "1.0.0.17",
   "description": "幫助用戶快速總結和閱讀網頁內容",
   "permissions": [
     "activeTab",
     "storage",
     "scripting",
-    "contextMenus"
+    "contextMenus",
+    "commands"
   ],
+  "commands": {
+    "summarize-page": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+S",
+        "mac": "MacCtrl+Shift+S"
+      },
+      "description": "總結當前頁面"
+    },
+    "summarize-selection": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+A",
+        "mac": "MacCtrl+Shift+A"
+      },
+      "description": "總結選取的內容"
+    }
+  },
   "background": {
     "service_worker": "background.js"
   },

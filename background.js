@@ -20,3 +20,35 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
         });
     }
 });
+
+// 監聽快捷鍵命令
+chrome.commands.onCommand.addListener(async (command) => {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab) return;
+
+    if (command === "summarize-page") {
+        // 清除之前可能存在的 pendingSelection
+        chrome.storage.local.remove(['pendingSelection', 'pendingTitle']);
+        // 打開 popup 或直接觸發總結
+        chrome.action.openPopup();
+    } else if (command === "summarize-selection") {
+        // 嘗試獲取選取的文字
+        try {
+            const [result] = await chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                func: () => window.getSelection().toString()
+            });
+            
+            if (result && result.trim()) {
+                chrome.storage.local.set({
+                    pendingSelection: result.trim(),
+                    pendingTitle: tab.title || "選取內容總結"
+                });
+            }
+        } catch (e) {
+            console.error("無法獲取選取內容:", e);
+        }
+        // 打開 popup
+        chrome.action.openPopup();
+    }
+});

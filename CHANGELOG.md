@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **多語系支援擴充**: 新增日語 (ja)、韓語 (ko)、法語 (fr)、德語 (de) 與西班牙語 (es)。
+- **自定義總結風格**: 支援簡明 (Concise)、標準 (Normal) 或詳細 (Detailed) 三種模式切換，適應不同閱讀場景。
+- **快捷鍵支援**: Ctrl+Shift+S (總結頁面) 與 Ctrl+Shift+A (總結選取內容)。
 - **雙重色彩自定義**: 支援自定義「字體顏色」與「背景顏色」。介面按鈕現在會根據字體色自動產生對應的框線，讓整體配色保持一致且優雅。
 - **歷史紀錄進階管理**: 新增單筆刪除、一鍵清空以及匯出為 JSON 檔案的功能。
 - **多模型選擇**: 提供選單讓使用者切換不同的 Groq 模型（如 GPT-OSS, Llama 3.3, Mixtral 等）。

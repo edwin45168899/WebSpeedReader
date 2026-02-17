@@ -340,6 +340,9 @@ document.addEventListener('DOMContentLoaded', function () {
     loadingText.textContent = t.loading;
     historyTitle.textContent = t.historyTitle;
 
+    loadingText.textContent = t.loading;
+    historyTitle.textContent = t.historyTitle;
+
     styleSelect.options[0].text = t.styles[0];
     styleSelect.options[1].text = t.styles[1];
     styleSelect.options[2].text = t.styles[2];
