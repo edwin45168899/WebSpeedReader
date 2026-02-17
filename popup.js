@@ -24,6 +24,10 @@ document.addEventListener('DOMContentLoaded', function () {
   const closeHistoryBtn = document.getElementById('close-history');
   const historyTitle = document.getElementById('history-title');
 
+  // 統計相關 DOM
+  const statsDiv = document.getElementById('stats');
+  const statsText = document.getElementById('stats-text');
+
   let rawSummary = ''; // 儲存原始 Markdown 文本
 
   // 顯示版本號
@@ -171,6 +175,7 @@ document.addEventListener('DOMContentLoaded', function () {
     summarizing = true; // 標記為正在總結
     summarizeBtn.disabled = true; // 禁用總結按鈕
     summaryDiv.innerHTML = ''; // 清空之前的總結
+    statsDiv.classList.add('hidden'); // 隱藏統計
     rawSummary = ''; // 重置原始文本
 
     try {
@@ -283,6 +288,31 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // 保存總結結果
       chrome.storage.local.set({ summary: rawSummary });
+
+      // 計算並顯示統計資訊
+      const originalText = String(pageContent || "");
+      const originalLen = originalText.length;
+      const summaryLen = rawSummary.length;
+
+      if (originalLen > 0) {
+        if (summaryLen > originalLen) {
+          // 內容反而變多了
+          if (currentLanguage === 'zh') {
+            statsText.textContent = `📝 內容擴展了 (原 ${originalLen} → 現 ${summaryLen} 字)`;
+          } else {
+            statsText.textContent = `📝 Content expanded (${originalLen} → ${summaryLen} chars)`;
+          }
+        } else {
+          const savedPercent = Math.round(((originalLen - summaryLen) / originalLen) * 100);
+          if (currentLanguage === 'zh') {
+            statsText.textContent = `⚡️ 節省了 ${savedPercent}% 的閱讀量 (${originalLen} → ${summaryLen} 字)`;
+          } else {
+            statsText.textContent = `⚡️ Saved ${savedPercent}% of reading (${originalLen} → ${summaryLen} chars)`;
+          }
+        }
+        statsDiv.classList.remove('hidden');
+      }
+
       // 儲存到歷史紀錄
       saveToHistory(rawSummary, tabTitle, tabUrl);
     } catch (error) {

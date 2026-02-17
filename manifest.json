@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "網頁快速閱讀助手",
-  "version": "1.0.0.8",
+  "version": "1.0.0.9",
   "description": "幫助用戶快速總結和閱讀網頁內容",
   "permissions": [
     "activeTab",

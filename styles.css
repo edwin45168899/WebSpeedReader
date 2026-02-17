@@ -166,6 +166,32 @@ select:hover {
   }
 }
 
+/* 統計資訊顯示樣式 */
+#stats {
+  margin: 12px 0;
+  padding: 8px 12px;
+  background-color: #f0f7ff;
+  border-left: 4px solid #2196F3;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #1565C0;
+  display: flex;
+  align-items: center;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* 總結區域打字效果輔助樣式 */
 #summary {
   position: relative;
