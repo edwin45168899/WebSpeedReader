@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', function () {
   const modelSelect = document.getElementById('model-select'); // 新增
   const summarizeBtn = document.getElementById('summarize-btn');
   const copyBtn = document.getElementById('copy-btn');
+  const ttsBtn = document.getElementById('tts-btn'); // 新增 TTS 按鈕
+  const historyBtn = document.getElementById('history-btn');
   const clearSummaryBtn = document.getElementById('clear-summary-btn'); // 新增
   const messageDiv = document.getElementById('message');
   const summaryDiv = document.getElementById('summary');
@@ -20,7 +22,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const loadingText = document.getElementById('loading-text');
 
   // 歷史紀錄相關 DOM
-  const historyBtn = document.getElementById('history-btn');
   const historyPanel = document.getElementById('history-panel');
   const historyList = document.getElementById('history-list');
   const closeHistoryBtn = document.getElementById('close-history');
@@ -76,6 +77,13 @@ document.addEventListener('DOMContentLoaded', function () {
       bgColorPicker.value = themeToUse === 'dark' ? '#1e1e1e' : '#ffffff';
     }
 
+    // 優先初始化 API Key 與語言
+    if (result.apiKey) {
+      apiKeyInput.value = result.apiKey;
+      updateApiKeyHint(result.apiKey);
+    }
+    updateLanguage();
+
     if (result.language) {
       currentLanguage = result.language; // 設定當前語言
       languageSelect.value = currentLanguage; // 更新語言選擇器的值
@@ -91,9 +99,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 如果有背景選取的內容，優先處理
     if (result.pendingSelection) {
+      // 來自右鍵選單的內容
       const selectedText = result.pendingSelection;
       const selectedTitle = result.pendingTitle || "選取內容總結";
-      // 清除 pending，避免下次開啟又是同一個
+      // 清除 pending，避免和下一次開啟衝突
       chrome.storage.local.remove(['pendingSelection', 'pendingTitle']);
       // 自動觸發總結
       summarize(selectedText, selectedTitle);
@@ -101,12 +110,6 @@ document.addEventListener('DOMContentLoaded', function () {
       rawSummary = result.summary;
       summaryDiv.innerHTML = marked.parse(rawSummary); // 顯示之前的總結（渲染後）
     }
-
-    if (result.apiKey) {
-      apiKeyInput.value = result.apiKey; // 顯示之前保存的 groq API Key
-      updateApiKeyHint(result.apiKey);
-    }
-    updateLanguage(); // 更新語言相關的 UI 文本
   });
 
   // 更新 API Key 提示（最後三碼）
@@ -155,15 +158,92 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // 複製按鈕點擊事件
   copyBtn.addEventListener('click', function () {
-    if (rawSummary) {
-      navigator.clipboard.writeText(rawSummary).then(() => {
-        const originalText = copyBtn.textContent;
-        copyBtn.textContent = currentLanguage === 'zh' ? '已複製' : 'Copied';
-        setTimeout(() => {
-          copyBtn.textContent = originalText;
-        }, 2000);
-      });
+    const textToCopy = rawSummary;
+    if (!textToCopy) return;
+
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      // 視覺反饋
+      const originalTitle = copyBtn.getAttribute('title');
+      copyBtn.setAttribute('title', currentLanguage === 'zh' ? '已複製！' : 'Copied!');
+      copyBtn.classList.add('copied');
+      setTimeout(() => {
+        copyBtn.setAttribute('title', originalTitle);
+        copyBtn.classList.remove('copied');
+      }, 2000);
+    }).catch(err => {
+      console.error('Failed to copy: ', err);
+    });
+  });
+
+  // TTS 語音朗讀邏輯
+  let isSpeaking = false;
+  const synth = window.speechSynthesis;
+  // 語言代碼映射表 (Map ISO 639-1 to BCP 47)
+  const langMap = {
+    'zh': 'zh-TW', // 繁體中文預設台灣口音
+    'en': 'en-US',
+    'ja': 'ja-JP',
+    'ko': 'ko-KR',
+    'fr': 'fr-FR',
+    'de': 'de-DE',
+    'es': 'es-ES'
+  };
+
+  ttsBtn.addEventListener('click', function () {
+    if (isSpeaking) {
+      stopSpeak();
+    } else {
+      // 從 DOM 獲取純文字內容 (去除 Markdown 符號)
+      // 使用 summaryDiv.innerText 而不是 rawSummary，因為 innerText 是已經渲染好的文字，讀起來比較順
+      const textToRead = summaryDiv.innerText;
+      if (!textToRead) return;
+
+      speak(textToRead, langMap[currentLanguage] || 'en-US');
     }
+  });
+
+  function speak(text, lang) {
+    if (synth.speaking) {
+      console.error('speechSynthesis.speaking');
+      return;
+    }
+
+    const utterThis = new SpeechSynthesisUtterance(text);
+    utterThis.lang = lang;
+    utterThis.rate = 1.0; // 語速
+    utterThis.pitch = 1.0; // 音調
+
+    utterThis.onstart = function () {
+      isSpeaking = true;
+      ttsBtn.classList.add('speaking');
+      // 切換圖示為「停止」 (可選)
+    };
+
+    utterThis.onend = function () {
+      isSpeaking = false;
+      ttsBtn.classList.remove('speaking');
+    };
+
+    utterThis.onerror = function (event) {
+      console.error('SpeechSynthesisUtterance.onerror', event);
+      isSpeaking = false;
+      ttsBtn.classList.remove('speaking');
+    };
+
+    synth.speak(utterThis);
+  }
+
+  function stopSpeak() {
+    if (synth.speaking) {
+      synth.cancel();
+    }
+    isSpeaking = false;
+    ttsBtn.classList.remove('speaking');
+  }
+
+  // 當 Popup 關閉時停止朗讀，避免背景持續有聲音
+  window.addEventListener('unload', function () {
+    stopSpeak();
   });
 
   // 歷史紀錄按鈕點擊事件
@@ -370,8 +450,17 @@ document.addEventListener('DOMContentLoaded', function () {
         tabTitle = forcedTitle || "選取內容";
         tabUrl = ""; // 選取內容可能無 URL 或不重要
       } else {
-        // 獲取當前活動標籤頁
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (!tab || !tab.url) {
+          throw new Error("無法獲取當前頁面資訊。");
+        }
+        if (tab.url.startsWith("chrome://") || tab.url.startsWith("edge://") || tab.url.startsWith("about:")) {
+          alert("此頁面受瀏覽器安全限制，無法執行擴充功能腳本。");
+          summarizing = false;
+          summarizeBtn.disabled = false;
+          return;
+        }
+
         tabTitle = tab.title;
         tabUrl = tab.url;
 

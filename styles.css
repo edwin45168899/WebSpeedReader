@@ -189,12 +189,49 @@ select:hover {
 #copy-btn {
   background-color: #2196F3;
   color: white;
-  border: 1px solid transparent;
+  min-width: 40px;
+  /* 圖示按鈕稍微窄一點 */
+  padding: 0 8px;
 }
 
-#copy-btn:hover {
-  background-color: #1E88E5;
+#copy-btn svg,
+#tts-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  margin-top: 2px;
+}
+
+/* 朗讀 - 紫色 */
+#tts-btn {
+  background-color: #9C27B0;
   color: white;
+  min-width: 40px;
+  padding: 0 8px;
+  transition: all 0.3s ease;
+}
+
+/* 朗讀中狀態 - 粉紅呼吸燈 */
+#tts-btn.speaking {
+  background-color: #E91E63;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(233, 30, 99, 0.7);
+  }
+
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 6px rgba(233, 30, 99, 0);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(233, 30, 99, 0);
+  }
 }
 
 /* 清除摘要 - 紅色 */
