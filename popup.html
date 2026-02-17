@@ -31,14 +31,16 @@
           <option value="normal">標準摘要</option>
           <option value="concise">簡明模式</option>
           <option value="detailed">深度解析</option>
+          <option value="custom">自定義指令</option>
         </select>
-        <select id="model-select">
-          <option value="openai/gpt-oss-20b">GPT-OSS 20B</option>
-          <option value="llama-3.3-70b-versatile">Llama 3.3 70B</option>
-          <option value="llama-3.1-8b-instant">Llama 3.1 8B</option>
-        </select>
+
       </div>
       <!-- 第二行：操作列 -->
+      <div id="custom-prompt-area" style="display: none; margin-bottom: 8px;">
+        <textarea id="custom-prompt" rows="3" placeholder="請輸入您的總結指令 (Prompt)..."
+          style="width: 100%; border-radius: 4px; padding: 6px; font-size: 13px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-color); resize: vertical;"></textarea>
+      </div>
+
       <div class="action-bar">
         <button id="summarize-btn" class="btn">總結</button>
         <button id="history-btn" class="btn">歷史</button>
@@ -69,15 +71,12 @@
       </div>
       <div id="history-list"></div>
     </div>
-    <div id="api-key-input">
-      <!-- groq API Key 輸入框 -->
-      <input type="password" id="api-key" placeholder="Groq API Key">
-      <span id="api-key-hint"></span>
-      <!-- 保存 groq API Key 按鈕 -->
-      <button id="save-api-key" class="btn">保存</button>
-    </div>
+
     <!-- 提示訊息區域 -->
     <div id="message">請點擊"總結"按鈕開始總結當前頁面內容。</div>
+
+
+
     <!-- 總結結果顯示區域 -->
     <div id="summary"></div>
     <!-- 統計資訊區域 -->
@@ -89,11 +88,56 @@
       <div class="spinner"></div>
       <span id="loading-text">正在思考...</span>
     </div>
+
+    <!-- 進階設定區域 -->
+    <details id="advanced-settings"
+      style="margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 10px;">
+      <summary id="advanced-summary"
+        style="cursor: pointer; font-size: 12px; color: var(--text-color); user-select: none;">⚙️ 進階設定 / Advanced
+      </summary>
+      <div class="settings-content" style="margin-top: 10px; padding: 0 5px;">
+
+        <!-- 模型選擇 -->
+        <div style="margin-bottom: 10px;">
+          <label for="model-select"
+            style="font-size: 12px; color: var(--text-color); display: block; margin-bottom: 4px;">AI Model:</label>
+          <select id="model-select"
+            style="width: 100%; padding: 6px; border-radius: 4px; background: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color);">
+            <option value="openai/gpt-oss-20b">GPT-OSS 20B</option>
+            <option value="llama-3.3-70b-versatile">Llama 3.3 70B</option>
+            <option value="llama-3.1-8b-instant">Llama 3.1 8B</option>
+          </select>
+        </div>
+
+        <!-- API Key -->
+        <div style="margin-bottom: 10px;">
+          <label for="api-key"
+            style="font-size: 12px; color: var(--text-color); display: block; margin-bottom: 4px;">API Key:</label>
+          <div id="api-key-input" style="display: flex; gap: 5px;">
+            <input type="password" id="api-key" placeholder="Groq API Key"
+              style="flex-grow: 1; padding: 6px; border-radius: 4px; background: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color);">
+            <button id="save-api-key" class="btn" style="padding: 6px 12px;">保存</button>
+          </div>
+          <span id="api-key-hint"
+            style="display: block; margin-top: 4px; font-size: 11px; color: var(--stats-text);"></span>
+        </div>
+
+        <!-- Max Tokens -->
+        <div style="margin-bottom: 10px;">
+          <label for="max-tokens"
+            style="font-size: 12px; color: var(--text-color); display: block; margin-bottom: 4px;">Max Tokens:</label>
+          <input type="number" id="max-tokens" placeholder="Default (e.g. 2048)" min="100" max="32000" step="100"
+            style="width: 100%; padding: 6px; border-radius: 4px; background: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color);">
+        </div>
+      </div>
+    </details>
+
     <!-- 版本號顯示 -->
     <div id="version-info">v<span id="version-number"></span></div>
   </div>
   <!-- 引入 Markdown 解析庫 -->
   <script src="marked.min.js"></script>
+
   <!-- 引入 JavaScript 文件 -->
   <script src="popup.js"></script>
 </body>

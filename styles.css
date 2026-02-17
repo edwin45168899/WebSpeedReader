@@ -516,7 +516,67 @@ select:hover {
   background: var(--secondary-text-color);
 }
 
-/* 版本號顯示樣式 */
+
+/* 進階設定面板樣式 */
+details#advanced-settings {
+  background-color: var(--card-bg);
+  /* 使用卡片背景色 */
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  margin-top: 20px;
+}
+
+details#advanced-settings[open] {
+  padding-bottom: 10px;
+}
+
+summary#advanced-summary {
+  padding: 8px 4px;
+  font-weight: 500;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  list-style: none;
+  /* 隱藏預設箭頭 */
+  display: flex;
+  align-items: center;
+}
+
+/* 自定義箭頭 */
+summary#advanced-summary::before {
+  content: '▶';
+  font-size: 10px;
+  margin-right: 6px;
+  transition: transform 0.2s;
+  display: inline-block;
+}
+
+details[open] summary#advanced-summary::before {
+  transform: rotate(90deg);
+}
+
+
+summary#advanced-summary:hover {
+  opacity: 1;
+}
+
+/* 設定內容動畫 */
+details[open] .settings-content {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 版本號調整 */
 #version-info {
   text-align: right;
   font-size: 10px;
