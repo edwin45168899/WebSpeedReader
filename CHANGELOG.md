@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **歷史紀錄 (History)**: 支援保存最近 10 次總結，包含網頁標題與時間戳記，點擊即可重載內容。
 - **自定義總結風格**: 新增選擇器，支援「標準摘要」、「簡明模式 (3個重點)」與「深度解析」三種風格。
 - **UI 佈局優化**: 擴大插槽寬度至 350px，並美化按鈕與下拉選單的視覺質感（圓角、過渡效果）。
 - **載入狀態美化**: 加入了實時打字機光標動畫效果與 Loading Spinner。

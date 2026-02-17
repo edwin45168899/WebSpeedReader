@@ -17,6 +17,13 @@ document.addEventListener('DOMContentLoaded', function () {
   const loadingDiv = document.getElementById('loading');
   const loadingText = document.getElementById('loading-text');
 
+  // 歷史紀錄相關 DOM
+  const historyBtn = document.getElementById('history-btn');
+  const historyPanel = document.getElementById('history-panel');
+  const historyList = document.getElementById('history-list');
+  const closeHistoryBtn = document.getElementById('close-history');
+  const historyTitle = document.getElementById('history-title');
+
   let rawSummary = ''; // 儲存原始 Markdown 文本
 
   // 載入之前的狀態
@@ -91,6 +98,19 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
+  // 歷史紀錄按鈕點擊事件
+  historyBtn.addEventListener('click', function () {
+    historyPanel.classList.toggle('hidden');
+    if (!historyPanel.classList.contains('hidden')) {
+      renderHistory();
+    }
+  });
+
+  // 關閉歷史紀錄
+  closeHistoryBtn.addEventListener('click', function () {
+    historyPanel.classList.add('hidden');
+  });
+
   // 保存 groq API Key 按鈕點擊事件
   saveApiKeyBtn.addEventListener('click', function () {
     const apiKey = apiKeyInput.value.trim(); // 獲取並修剪 groq API Key
@@ -105,9 +125,11 @@ document.addEventListener('DOMContentLoaded', function () {
     if (currentLanguage === 'zh') {
       summarizeBtn.textContent = '總結'; // 更新總結按鈕文本
       copyBtn.textContent = '複製'; // 更新複製按鈕文本
+      historyBtn.textContent = '歷史'; // 更新歷史按鈕文本
       clearSummaryBtn.textContent = '清除'; // 更新清除按鈕文本
       messageDiv.textContent = '請點擊"總結"按鈕開始總結當前頁面內容。'; // 更新提示訊息
       loadingText.textContent = '正在思考...';
+      historyTitle.textContent = '最近總結';
       // 更新風格選單文本
       styleSelect.options[0].text = '標準摘要';
       styleSelect.options[1].text = '簡明模式';
@@ -115,9 +137,11 @@ document.addEventListener('DOMContentLoaded', function () {
     } else {
       summarizeBtn.textContent = 'Summarize'; // 更新總結按鈕文本
       copyBtn.textContent = 'Copy'; // 更新複製按鈕文本
+      historyBtn.textContent = 'History'; // 更新歷史按鈕文本
       clearSummaryBtn.textContent = 'Clear'; // 更新清除按鈕文本
       messageDiv.textContent = 'Please click the "Summarize" button to start summarizing the current page content.'; // 更新提示訊息
       loadingText.textContent = 'Thinking...';
+      historyTitle.textContent = 'Recent Summaries';
       // 更新風格選單文本
       styleSelect.options[0].text = 'Normal';
       styleSelect.options[1].text = 'Concise';
@@ -192,7 +216,7 @@ document.addEventListener('DOMContentLoaded', function () {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: "openai/gpt-oss-120b",
+          model: "openai/gpt-oss-20b",
           messages: [{ role: "user", content: prompt }],
           stream: true
         })
@@ -231,6 +255,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // 保存總結結果
       chrome.storage.local.set({ summary: rawSummary });
+      // 儲存到歷史紀錄
+      saveToHistory(rawSummary, tab.title, tab.url);
     } catch (error) {
       console.error('Error:', error);
       summaryDiv.textContent = currentLanguage === 'zh' ? '總結時發生錯誤' : 'An error occurred during summarization'; // 顯示錯誤訊息
@@ -239,5 +265,57 @@ document.addEventListener('DOMContentLoaded', function () {
       summarizeBtn.disabled = false; // 啟用總結按鈕
       loadingDiv.classList.add('hidden'); // 確保隱藏載入動畫
     }
+  }
+
+  // 儲存到歷史紀錄 (最多 10 筆)
+  function saveToHistory(summary, title, url) {
+    chrome.storage.local.get(['history'], function (result) {
+      let history = result.history || [];
+      const newEntry = {
+        summary: summary,
+        title: title,
+        url: url,
+        date: new Date().toLocaleString(),
+        timestamp: Date.now()
+      };
+      // 避免重複儲存相同的內容 (以內容或是 URL/標題組合判斷)
+      history = history.filter(item => item.summary !== summary);
+      history.unshift(newEntry);
+      if (history.length > 10) {
+        history.pop();
+      }
+      chrome.storage.local.set({ history: history });
+    });
+  }
+
+  // 渲染歷史紀錄清單
+  function renderHistory() {
+    chrome.storage.local.get(['history'], function (result) {
+      const history = result.history || [];
+      historyList.innerHTML = '';
+      if (history.length === 0) {
+        historyList.innerHTML = `<div style="padding: 20px; text-align: center; color: #999; font-size: 12px;">${currentLanguage === 'zh' ? '尚無歷史紀錄' : 'No history yet'}</div>`;
+        return;
+      }
+
+      history.forEach((item, index) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'history-item';
+        itemDiv.innerHTML = `
+          <div class="history-item-title">${item.title}</div>
+          <div class="history-item-meta">
+            <span>${item.date}</span>
+          </div>
+        `;
+        itemDiv.addEventListener('click', () => {
+          rawSummary = item.summary;
+          summaryDiv.innerHTML = marked.parse(rawSummary);
+          historyPanel.classList.add('hidden');
+          // 保存為當前總結，方便重新整理後還在
+          chrome.storage.local.set({ summary: rawSummary });
+        });
+        historyList.appendChild(itemDiv);
+      });
+    });
   }
 });

@@ -24,10 +24,20 @@
       </select>
       <!-- 總結按鈕 -->
       <button id="summarize-btn" class="btn">總結</button>
+      <!-- 歷史紀錄按鈕 -->
+      <button id="history-btn" class="btn">歷史</button>
       <!-- 複製按鈕 -->
       <button id="copy-btn" class="btn">複製</button>
       <!-- 清除按鈕 -->
       <button id="clear-summary-btn" class="btn">清除</button>
+    </div>
+    <!-- 歷史紀錄面版 -->
+    <div id="history-panel" class="hidden">
+      <div class="history-header">
+        <span id="history-title">最近總結</span>
+        <button id="close-history" class="btn-small">✕</button>
+      </div>
+      <div id="history-list"></div>
     </div>
     <div id="api-key-input">
       <!-- groq API Key 輸入框 -->

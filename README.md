@@ -2,7 +2,7 @@
 
 ![總結](./images/總結DEMO.gif)
 
-**WebSpeedReader** 是一款專為效率控設計的 Chrome 擴充套件！⚡️ 它透過 [Groq](https://console.groq.com/) 驅動的高速 AI 模型（如 `llama-3.3-70b`），在幾秒鐘內為您讀完長篇大論，並精煉出最有價值的重點。
+**WebSpeedReader** 是一款專為效率控設計的 Chrome 擴充套件！⚡️ 它透過 [Groq](https://console.groq.com/) 驅動的高速 AI 模型（如 `openai/gpt-oss-20b`），在幾秒鐘內為您讀完長篇大論，並精煉出最有價值的重點。
 
 ---
 
